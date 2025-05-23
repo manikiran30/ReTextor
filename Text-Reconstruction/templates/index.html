@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>OCR Text Reconstruction</title>
+  <link rel="stylesheet" href="/static/style.css">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      background-color: #f4f4f4;
+    }
+    h1 {
+      background-color: #222;
+      color: white;
+      padding: 1rem;
+    }
+    .buttons button {
+      margin: 1rem;
+      padding: 1rem 2rem;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+    textarea {
+      width: 80%;
+      height: 120px;
+      margin-top: 1rem;
+    }
+    video, canvas {
+      margin-top: 1rem;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <h1>OCR Text Reconstruction</h1>
+
+  <div class="buttons">
+    <input type="file" id="fileInput" accept="image/*" hidden>
+    <button onclick="handleUploadClick()">Upload File</button>
+
+    <button onclick="startCamera()">Scan Camera</button>
+    <button onclick="captureImage()">📸 Capture</button>
+  </div>
+
+  <video id="video" width="400" autoplay></video>
+  <canvas id="canvas" width="400" height="300"></canvas>
+
+  <div class="results">
+    <h3>📄 Extracted Text</h3>
+    <textarea id="extractedText" readonly></textarea>
+
+    <h3>✅ Grammar Corrected</h3>
+    <textarea id="grammarCorrected" readonly></textarea>
+
+    <h3>✍️ Editable Final Text</h3>
+    <textarea id="finalText"></textarea>
+  </div>
+
+  <script>
+    const video = document.getElementById('video');
+    const canvas = document.getElementById('canvas');
+    const fileInput = document.getElementById('fileInput');
+    let cameraStream = null;
+
+    function hidePreview() {
+      video.style.display = 'none';
+      canvas.style.display = 'none';
+    }
+
+    function handleUploadClick() {
+      hidePreview();
+      fileInput.click();
+    }
+
+    function startCamera() {
+      hidePreview();
+      navigator.mediaDevices.getUserMedia({ video: true })
+        .then(stream => {
+          cameraStream = stream;
+          video.srcObject = stream;
+          video.style.display = 'block';
+        })
+        .catch(err => {
+          alert("Unable to access camera");
+          console.error(err);
+        });
+    }
+
+    function stopCamera() {
+      if (cameraStream) {
+        cameraStream.getTracks().forEach(track => track.stop());
+        cameraStream = null;
+      }
+      video.srcObject = null;
+      video.style.display = 'none';
+    }
+
+    function captureImage() {
+      if (!cameraStream) return;
+
+      const context = canvas.getContext('2d');
+      context.drawImage(video, 0, 0, canvas.width, canvas.height);
+      canvas.style.display = 'block';
+
+      stopCamera();
+
+      canvas.toBlob(blob => {
+        const formData = new FormData();
+        const file = new File([blob], 'captured.png', { type: 'image/png' });
+        formData.append('image', file);
+        uploadImage(formData);
+      }, 'image/png');
+    }
+
+    async function uploadImage(formData) {
+      const response = await fetch('/upload', {
+        method: 'POST',
+        body: formData
+      });
+
+      const result = await response.json();
+      document.getElementById('extractedText').value = result.extracted_text || '';
+      document.getElementById('grammarCorrected').value = result.grammar_corrected || '';
+      document.getElementById('finalText').value = result.grammar_corrected || '';
+    }
+
+    fileInput.addEventListener('change', () => {
+      hidePreview();
+      const file = fileInput.files[0];
+      const formData = new FormData();
+      formData.append('image', file);
+      uploadImage(formData);
+    });
+  </script>
+</body>
+</html>

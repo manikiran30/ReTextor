@@ -1,0 +1,32 @@
+body {
+    font-family: Arial, sans-serif;
+    padding: 20px;
+    background-color: #f8f9fa;
+    text-align: center;
+  }
+  
+  h1 {
+    margin-bottom: 30px;
+  }
+  
+  .buttons button {
+    margin: 10px;
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+  }
+  
+  .results {
+    margin-top: 30px;
+  }
+  
+  textarea {
+    width: 80%;
+    height: 120px;
+    margin: 10px auto;
+    display: block;
+    padding: 10px;
+    font-size: 14px;
+    resize: vertical;
+  }
+  

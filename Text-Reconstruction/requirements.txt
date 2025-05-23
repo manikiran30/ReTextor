@@ -1,0 +1,6 @@
+Flask
+textblob
+transformers
+torch
+google-cloud-vision
+pillow
