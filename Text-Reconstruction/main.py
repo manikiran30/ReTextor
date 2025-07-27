@@ -11,7 +11,7 @@ UPLOAD_FOLDER = 'uploads'
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 
-credentials = service_account.Credentials.from_service_account_file('my ocr google api.json')
+credentials = service_account.Credentials.from_service_account_file('yourJsonfile.json')
 client = vision.ImageAnnotatorClient(credentials=credentials)
 
 # 🔠 Grammar correction tool
